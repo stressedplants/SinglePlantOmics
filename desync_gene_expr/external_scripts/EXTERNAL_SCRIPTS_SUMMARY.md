@@ -1,0 +1,3 @@
+# External scripts included for local output
+
+-   dynGENIE3_compiled is a copy of DynGENIE3 - which has been adapted slightly to include the Windows (.dll) version of the executable. Note that the C file can be compiled again using `R CMD SHLIB dynGENIE3.c`. *Ref: Huynh-Thu, V. A. & Geurts, P. dynGENIE3: dynamical GENIE3 for the inference of gene networks from time series expression data. Sci. Rep. 8, 3384 (2018).* 

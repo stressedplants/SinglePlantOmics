@@ -1,0 +1,22 @@
+{
+    "read_files": "[ ./trimmed_reads_paired/P100_tr_filter_improved_1.fq.gz, ./trimmed_reads_paired/P100_tr_filter_improved_2.fq.gz]",
+    "expected_format": "ISR",
+    "compatible_fragment_ratio": 1.0,
+    "num_compatible_fragments": 32059275,
+    "num_assigned_fragments": 32059275,
+    "num_frags_with_concordant_consistent_mappings": 23970650,
+    "num_frags_with_inconsistent_or_orphan_mappings": 8160704,
+    "strand_mapping_bias": 0.00000855205206489297,
+    "MSF": 0,
+    "OSF": 0,
+    "ISF": 205,
+    "MSR": 0,
+    "OSR": 0,
+    "ISR": 23970650,
+    "SF": 6427549,
+    "SR": 1732950,
+    "MU": 0,
+    "OU": 0,
+    "IU": 0,
+    "U": 0
+}

@@ -1,0 +1,10 @@
+{
+    "salmon_version": "1.6.0",
+    "index": "./salmon_init/athal_index",
+    "libType": "A",
+    "mates1": "./trimmed_reads_paired/P049_tr_filter_improved_1.fq.gz",
+    "mates2": "./trimmed_reads_paired/P049_tr_filter_improved_2.fq.gz",
+    "validateMappings": [],
+    "output": "./salmon_init/quants/P049_quant/",
+    "auxDir": "aux_info"
+}

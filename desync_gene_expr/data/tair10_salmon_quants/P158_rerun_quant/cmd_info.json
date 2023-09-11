@@ -1,0 +1,10 @@
+{
+    "salmon_version": "1.6.0",
+    "index": "./athal_index",
+    "libType": "A",
+    "mates1": "./trimmed_reads/P158_rerun_1.fq.gz",
+    "mates2": "./trimmed_reads/P158_rerun_2.fq.gz",
+    "validateMappings": [],
+    "output": "./quants/P158_rerun_quant/",
+    "auxDir": "aux_info"
+}

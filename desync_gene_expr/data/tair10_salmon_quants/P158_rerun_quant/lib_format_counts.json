@@ -1,0 +1,22 @@
+{
+    "read_files": "[ ./trimmed_reads/P158_rerun_1.fq.gz, ./trimmed_reads/P158_rerun_2.fq.gz]",
+    "expected_format": "ISR",
+    "compatible_fragment_ratio": 1.0,
+    "num_compatible_fragments": 45628767,
+    "num_assigned_fragments": 45628767,
+    "num_frags_with_concordant_consistent_mappings": 31710688,
+    "num_frags_with_inconsistent_or_orphan_mappings": 14034427,
+    "strand_mapping_bias": 0.000006527724934915902,
+    "MSF": 0,
+    "OSF": 0,
+    "ISF": 207,
+    "MSR": 0,
+    "OSR": 0,
+    "ISR": 31710688,
+    "SF": 10898989,
+    "SR": 3135231,
+    "MU": 0,
+    "OU": 0,
+    "IU": 0,
+    "U": 0
+}

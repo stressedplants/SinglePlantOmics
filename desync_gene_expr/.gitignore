@@ -1,0 +1,21 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Don't store personal info
+.RDataTmp
+**/.DS_Store
+
+# Top .Rdata file(s) should be ignored. Others contain useful data.
+.RData
+after_data_loading.RData
+
+# Don't consider a scratch file which can be used to test out random ideas
+R/scratch_file_for_tests.R
+
+# Ignore all large binary plots (can be >50MB)
+**/*.tiff
+
+# Ignore all network analysis outputs as these tend to be very large
+outputs/network_analysis/*
