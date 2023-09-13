@@ -7,4 +7,6 @@ There are more details READMEs in the subfolders.
 
 ## BioRxiv preprint now available
 
-https://www.biorxiv.org/content/10.1101/2023.09.11.557157v1
+Single-plant-omics reveals the cascade of transcriptional changes during the vegetative-to-reproductive transition
+Ethan J Redmond, James Ronald, Seth J Davis, Daphne Ezer
+bioRxiv 2023.09.11.557157; doi: https://doi.org/10.1101/2023.09.11.557157
