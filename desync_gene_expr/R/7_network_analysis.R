@@ -61,6 +61,42 @@ time_vec_dynGENIE3 <- 1:number_of_timepoints
 genes_in_dynGENIE3 <- rescaled_fd$fdnames$reps
 regs_list <- TFs_in_DAP[TFs_in_DAP %in% genes_in_dynGENIE3]
 
+# filter regulators and targets for monotonic genes
+regs_list = intersect(regs_list, monotonic_genes)
+genes_in_dynGENIE3 = intersect(genes_in_dynGENIE3, monotonic_genes)
+
+# Save a list of filtering values for pseudotime smoothing and GRN values ===
+
+woo_de_values <- as.data.frame(read_excel(
+  "data/PP2015-01929R1_Supplemental_Table_S3.xls",
+  skip = 3
+))
+
+any_tx_woo_de <- sapply(ordered_GCV_genes, function(gene) {
+  subset_all_txs <- woo_de_values[woo_de_values$`Gene ID` == gene, ]
+  return(any(subset_all_txs$`M-to-S DET` == "DET"))
+})
+
+filtering_values <- data.frame(
+  gcv_value = optimal_outputs$gcv[ordered_GCV_genes],
+  iqr_value = ratios_vec[ordered_GCV_genes],
+  woo_differentially_expressed = any_tx_woo_de,
+  regulator_in_GRN = ordered_GCV_genes %in% regs_list
+)
+row.names(filtering_values) <- ordered_GCV_genes
+
+print(paste0(
+  sum(filtering_values$woo_differentially_expressed & filtering_values$regulator_in_GRN),
+  " out of ",
+  sum(filtering_values$regulator_in_GRN),
+  " regulators in GRN were differentially expressed in Woo et al. 2016"
+))
+
+write.csv(filtering_values,
+          "outputs/pseudotime/filtering_values.csv")
+
+# Run DynGENIE3 ===
+
 source("external_scripts/dynGENIE3_compiled/dynGENIE3.R")
 
 link_list_filepath_ns <- 'outputs/network_analysis/link_list_all_dynGENIE3_nonsmoothed.csv'
@@ -73,6 +109,7 @@ expr_data_dynGENIE3_ns <- list(t(as.matrix(TPM_dynGENIE3_ns)))
 
 if (!file.exists(link_list_filepath_ns)) {
   print("Running DynGENIE3 on unsmoothed data")
+  
   # this is intensive (take ~20 mins on my laptop)
   dynGENIE3_output_ns <- dynGENIE3(expr_data_dynGENIE3_ns, time_points_dynGENIE3_ns,
                                    regulators = regs_list,
@@ -186,7 +223,6 @@ auc_exact_dynGENIE3 <- AUC_total_df[vertex_list, "AUC_value"]
 
 # TRUE if beginning value is larger than end value, FALSE otherwise
 classify_down <- sapply(vertex_list, function(gname) {
-  print(gname)
   temp_evals <- eval.fd(range_of_timeseries, rescaled_fd[gname])
   return(temp_evals[1] > temp_evals[2])
 })

@@ -171,11 +171,16 @@ print(pseudotime_DE_counts)
 # Visualise pseudotime fits compared to real gene expression ============
 
 plot_fitted_values <- function(sample_id,
+                               plot_title = NA,
                                verbose = FALSE,
                                scale_to_01 = FALSE) {
   
   if (verbose) {  # useful if selecting random genes
     print(sample_id)
+  }
+  
+  if (is.na(plot_title)) {
+    plot_title <- paste0(sample_id, " over pseudotime")
   }
   
   if (scale_to_01) {
@@ -184,7 +189,7 @@ plot_fitted_values <- function(sample_id,
     plot(1:nrow(TPM_for_smoothing), expression_values,
          xlab = "Order of sample over pseudotime", ylab = "Normalised expression")
     lines(optimal_outputs$fd[sample_id], col = "purple", lwd = 2)
-    title(main = paste0(sample_id, " over pseudotime"),
+    title(main = plot_title,
           sub = paste0("GCV = ",
                        sprintf(optimal_outputs$gcv[sample_id], fmt = "%#.5f")))
   } else {
@@ -205,7 +210,7 @@ plot_fitted_values <- function(sample_id,
          xlab = "Order of sample over pseudotime", ylab = "Expression (TPM)",
          ylim = c(0, max(expression_values)))
     lines(rescaled_single, col = "purple", lwd = 2)
-    title(main = paste0(sample_id, " over pseudotime"),
+    title(main = plot_title,
           sub = paste0("GCV = ",
                        sprintf(optimal_outputs$gcv[sample_id], fmt = "%#.5f"),
                        "  ||  CV^2 = ",
@@ -241,14 +246,45 @@ plot(quantiles_ratios, 1 - evaluated_probs, log = "x",
      xlab = "Cutoff point", ylab = "Proportion of samples removed",
      type = "l")
 abline(v = IQR_threshold, col = "red", lty = "dashed", lwd = 2)
-abline(v = ratios_vec["AT4G24000"], col = "red")
+abline(v = ratios_vec["AT5G04380"], col = "red")
 dev.off()
 
 # sample through the bad ones if interested
 svg(filename = "plots/pseudotime/IQR_filtering_example.svg",
     width = 9, height = 5.5, pointsize = 18)
-plot_fitted_values("AT4G24000")
+plot_fitted_values("AT5G04380")
 dev.off()
+
+# produce multiple examples of genes with bad GCV scores ========
+
+indexes_of_bad_genes <- c(10000, 15000, 19250)
+
+svg("plots/pseudotime/GCV_bad_egs.svg",
+    width = 9, height = 5.5, pointsize = 10)
+old_pars <- par(mfrow = c(2,2))
+
+plot(optimal_outputs$gcv[order(optimal_outputs$gcv)],
+     xlab = "Position in order of GCV values",
+     ylab = "GCV value",
+     type = "l",
+     lwd = 2)
+abline(v = threshold_to_keep)
+abline(v = indexes_of_bad_genes[1], col = "red")
+abline(v = indexes_of_bad_genes[2], col = "red")
+abline(v = indexes_of_bad_genes[3], col = "red")
+
+for (bad_index in indexes_of_bad_genes) {
+  bad_gene <- ordered_GCV_genes[bad_index]
+  
+  plot_fitted_values(
+    bad_gene, 
+    plot_title = bad_gene,
+    scale_to_01 = TRUE
+  )
+}
+dev.off()
+
+par(old_pars)
 
 # find genes within these ranges and remove them =====
 
@@ -259,12 +295,3 @@ keep_after_IQR <- setdiff(keep_after_GCV, remove_after_IQR)
 num_after_IQR <- length(keep_after_IQR)
 print(paste0("Leaves ", num_after_IQR, " genes after GCV and IQR filtering"))
 
-# save a data frame with these values =========
-filtering_values <- data.frame(
-  gcv_value = optimal_outputs$gcv[ordered_GCV_genes],
-  iqr_value = ratios_vec[ordered_GCV_genes]
-)
-row.names(filtering_values) <- ordered_GCV_genes
-
-write.csv(filtering_values,
-          "outputs/pseudotime/filtering_values.csv")

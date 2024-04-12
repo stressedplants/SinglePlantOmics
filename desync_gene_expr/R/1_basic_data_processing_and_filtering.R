@@ -77,9 +77,8 @@ temp_name_list <- str_remove(names(file_list),
 temp_name_list <- str_remove(temp_name_list, fixed("_quant"))
 names(file_list) <- temp_name_list
 
-# save two copies of the input data - either genes only or with all transcripts
 txi_data_genes <- tximport(file_list, type = "salmon", tx2gene = trans_to_gene)
-txi_data_tx <- tximport(file_list, type = "salmon", txOut = T)
+# txi_data_tx <- tximport(file_list, type = "salmon", txOut = T)
 
 # these were only used in this section
 rm(file_list, first_fold, folder_list, count_raw_init, trans_to_gene,
@@ -185,36 +184,67 @@ TPM_filtered <- TPM_master[genes_to_keep, ]
 print(paste0("Number of remaining genes after filtering: ",
              nrow(TPM_filtered)))
 
-# Quick hierarchical clustering plot =========
+# # Hierarchical clustering plot =========
+# 
+# plant_hclust <- hclust(dist(t(TPM_filtered)))
+# 
+# svg(filename = './plots/initial_processing/hclust_all.svg', 
+#     width = 12, height = 7)
+# plot(plant_hclust, xlab = 'Plant ID', sub = "")
+# dev.off()
+# 
+# rm(plant_hclust)
 
-plant_hclust <- hclust(dist(t(TPM_filtered)))
+# Remove variables related to low / high gene expression ======
 
-svg(filename = './plots/initial_processing/hclust_all.svg', 
-    width = 12, height = 7)
-plot(plant_hclust, xlab = 'Plant ID', sub = "")
-abline(h = 11500, col = "red")
-dev.off()
+rm(number_of_samples,
+   low_count_boolean_matrix,
+   low_count_samples,
+   low_count_positions,
+   first_low_filtering_genes)
 
-rm(plant_hclust)
+# PCA plot - justification to remove P196 and P158 =========
 
-# Remove plants which have been left in single branches ======
-# ie P169, P196, P098, and P079 
-# and replace P158 with P158_rerun
+pca_pre_P196 <- prcomp(t(log2(TPM_filtered + 1)))
+plant_pca_summary <- summary(pca_pre_P196)$importance
+
+first_pc <- 1
+second_pc <- 2
+
+pca_plant_for_plot <- data.frame(pca_pre_P196$x[, c(first_pc, second_pc)])
+
+# modify rownames because of P158_rerun
+modified_rownames <- row.names(pca_plant_for_plot)
+modified_rownames[modified_rownames == "P158_rerun"] <- "P158"
+
+pca_plant_for_plot$bolting <- conds[modified_rownames, "bolting"]
+
+pca_filtering <- ggplot(pca_plant_for_plot, aes(x = PC1, y = PC2,
+                                                color = bolting)) + 
+  geom_point() +
+  scale_color_manual(values = c("N" = no_col,
+                                "Y" = yes_col)) +
+  xlab(paste0("PC", first_pc, " (", 
+              sprintf(plant_pca_summary[2, first_pc]*100, fmt = "%#.1f"),
+              "% of variance)")) +
+  ylab(paste0("PC", second_pc," (",
+              sprintf(plant_pca_summary[2, second_pc]*100, fmt = "%#.1f"),
+              "% of variance)")) + 
+  geom_text_repel(label = rownames(pca_plant_for_plot),
+                  max.overlaps = 20,
+                  seed = 1234) +
+  theme_classic(base_size = 12)
+
+ggsave("./plots/initial_processing/pca_pre_196.svg", pca_filtering,
+       width = 10, height = 7)
+
+# Remove P196 and (original) P158 ====
 
 TPM_filtered <- TPM_filtered[
-  , !(colnames(TPM_filtered) %in% c("P169", "P196", "P098", "P079", "P158"))
+  , !(colnames(TPM_filtered) %in% c("P158", "P196"))
 ]
 
 colnames(TPM_filtered)[which(colnames(TPM_filtered) == "P158_rerun")] <- "P158"
-
-new_hclust <- hclust(dist(t(TPM_filtered)))
-
-svg('./plots/initial_processing/hclust_remove_singles.svg', 
-    width = 12, height = 7)
-plot(new_hclust, xlab = 'Plant ID', sub = "")
-dev.off()
-
-rm(new_hclust)
 
 # Ensure genes meet the filtering criteria after removal of samples ====
 
@@ -236,16 +266,38 @@ TPM_filtered <- TPM_filtered[
   !(row.names(TPM_filtered) %in% final_low_removed_genes), 
 ]
 
-print(paste0("Final number of genes after removing singleton plants and filtering: ",
+print(paste0("Final number of genes after removing P128 and P196: ",
              nrow(TPM_filtered)))
 
-# Remove variables related to low / high gene expression ======
+# Repeat PCA after this filtering ====
 
-rm(number_of_samples,
-   low_count_boolean_matrix,
-   low_count_samples,
-   low_count_positions,
-   first_low_filtering_genes)
+pca_post_P196 <- prcomp(t(log2(TPM_filtered + 1)))
+plant_pca_summary <- summary(pca_post_P196)$importance
+
+first_pc <- 1
+second_pc <- 2
+
+pca_plant_for_plot <- data.frame(pca_post_P196$x[, c(first_pc, second_pc)])
+pca_plant_for_plot$bolting <- conds[row.names(pca_plant_for_plot), "bolting"]
+
+pca_filtering <- ggplot(pca_plant_for_plot, aes(x = PC1, y = PC2,
+                                                color = bolting)) + 
+  geom_point() +
+  scale_color_manual(values = c("N" = no_col,
+                                "Y" = yes_col)) +
+  xlab(paste0("PC", first_pc, " (", 
+              sprintf(plant_pca_summary[2, first_pc]*100, fmt = "%#.1f"),
+              "% of variance)")) +
+  ylab(paste0("PC", second_pc," (",
+              sprintf(plant_pca_summary[2, second_pc]*100, fmt = "%#.1f"),
+              "% of variance)")) + 
+  geom_text_repel(label = rownames(pca_plant_for_plot),
+                  max.overlaps = 20,
+                  seed = 1234) +
+  theme_classic(base_size = 12)
+
+ggsave("./plots/initial_processing/pca_post_196.svg", pca_filtering,
+       width = 10, height = 7)
 
 # Save the values for prediction =============
 
@@ -258,11 +310,12 @@ phenos_to_predict <- as.data.frame(
 rownames(phenos_to_predict) <- phenos_to_predict$id
 phenos_to_predict <- within(phenos_to_predict, rm(id))
 
+write.csv(phenos_to_predict, file = "outputs/tpm_tables/phenos_to_predict.csv",
+          quote = FALSE)
+
 TPMs_filtered_z_scored <- get_z_score_matrix(TPM_filtered)
 
 write.csv(TPMs_filtered_z_scored, file = "outputs/tpm_tables/TPM_z_scored.csv",
-          quote = FALSE)
-write.csv(phenos_to_predict, file = "outputs/tpm_tables/phenos_to_predict.csv",
           quote = FALSE)
 
 # Write other values for supplementary figures =========
@@ -275,7 +328,7 @@ write.csv(TPM_filtered,
 
 # Plant similarity heatmap =======
 
-print('Plotting similarity of plants')
+print('Plotting similarity of plants AFTER all filtering')
 
 conds_filtered <- data.frame(conds[(conds$id %in% colnames(TPM_filtered)),])
 id_temp <- conds_filtered$id
@@ -416,13 +469,27 @@ if (!file.exists(id_name_file)) {
   )
 }
 
-
 # Filter for regulators =========
 
 # Load regulatory genes from a file, to ensure consistency with the Feb 23 database
 
-regulator_genes_df <- read.csv("data/biomaRt_data/biomaRt_feb_23_regulatory_genes.csv")
-regulator_genes <- regulator_genes_df[, 2]
+regulator_genes_file <- "data/biomaRt_data/biomaRt_regulatory_genes.txt"
+
+if (!file.exists(regulator_genes_file)) {
+  list_of_regulatory_GO_terms <- c("GO:0003700", "GO:0004871", "GO:0006355")
+  
+  BM_for_regulators <- BM_after_filtering[
+    BM_after_filtering$go_id %in% list_of_regulatory_GO_terms, 
+  ]
+  
+  regulator_genes <- unique(BM_for_regulators$tair_locus)
+  regulator_genes <- regulator_genes[regulator_genes %in% row.names(TPM_filtered)]
+  
+  cat(sapply(regulator_genes, toString), 
+      file = regulator_genes_file, sep = "\n")
+} else {
+  regulator_genes <- readLines(regulator_genes_file)
+}
 
 print(paste0("Number of regulatory genes included after filtering: ",
              length(regulator_genes)))
@@ -452,8 +519,7 @@ rm(TF_family_preproc_df)
 
 # Remove any leftover variables that will not be used again ============
 
-rm(TPM_low_removed, 
-   txi_data_tx,
+rm(TPM_low_removed,
    conds,
    genes_to_keep,
    final_low_removed_genes)

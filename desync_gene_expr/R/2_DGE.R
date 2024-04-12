@@ -6,7 +6,7 @@ txi_for_DE <- txi_data_genes
 
 coerce_samples <- function(matrix) {
   # used specifically to delete P128 and singletons and replace P158 by P158_rerun
-  keep_cols = which(!(colnames(matrix) %in% c("P128", "P169", "P196", "P098", "P079", "P158")))
+  keep_cols = which(!(colnames(matrix) %in% c("P128", "P158", "P196")))
   out_matrix <- matrix[, keep_cols]
   P158_rerun_loc <- which(colnames(out_matrix) == "P158_rerun")
   colnames(out_matrix)[P158_rerun_loc] <- "P158"
@@ -107,62 +107,8 @@ write.xlsx(
   sheetName = "DEGs"
 )
 
-# Save results to upload to gProfiler for GO terms =========
-
-# this is still very useful for uploading to website - a better interface
-save_lists_gprofiler <- function(list_of_gene_lists, file_name) {
-
-  list_to_write <- c()
-  for (lvl in 1:length(list_of_gene_lists)) {
-    list_to_write <- append(list_to_write,
-                            paste0(">Cluster ", lvl))
-
-    # select all genes in that cluster
-    list_to_write <- append(list_to_write,
-                            list_of_gene_lists[[lvl]])
-  }
-  fileConn <- file(file_name)
-  writeLines(list_to_write, file_name)
-  close(fileConn)
-}
-
-save_gene_lists_GOrilla <- function(
-      list_of_vecs,
-      folder_name  # should end in /
-  ) {
-
-    for (lvl in 1:length(list_of_vecs)) {
-      # output to a separate file for each cluster
-
-      file_out <- paste0(folder_name, "GOrilla_cluster_", lvl, ".txt")
-      # select all genes in that cluster
-      genes_in_lvl <- list_of_vecs[[lvl]]
-      
-      fileConn <- file(file_out)
-      writeLines(genes_in_lvl, fileConn)
-      close(fileConn)
-    }
-
-}
-
 DE_UP <- as.vector(volcano_data[volcano_data$diffexpressed == "UP", ]$id)
 DE_DOWN <- as.vector(volcano_data[volcano_data$diffexpressed == "DOWN", ]$id)
-
-# save all DEs
-save_lists_gprofiler(
-  list(DE_UP, DE_DOWN),
-  "outputs/clustering_and_DE/differentially_expressed.txt"
-)
-
-save_gene_lists_GOrilla(
-  list(DE_UP, DE_DOWN),
-  "outputs/clustering_and_DE/DE_for_GOrilla/"
-)
-
-# also save a background set of all genes in TAIR10 from TPM_master
-fileConn <- file("outputs/clustering_and_DE/DE_for_GOrilla/background.txt")
-writeLines(row.names(TPM_master), fileConn)
-close(fileConn)
 
 # Visualisation of TPMs with specific GO / KEGG terms ===========
 
@@ -410,23 +356,27 @@ hlist <- make_heatmap_based_on_GO(
   row_dend_thickness = 0.4,
   use_dendsort = TRUE,
   use_raster = TRUE,
-  raster_quality = 10
+  rotate_top_branches_point = 14,
+  raster_quality = 10,
+  reverse_dend = TRUE
 )
 
 total <- hlist[[1]] %v% hlist[[2]] %v% hlist[[3]] %v% hlist[[4]]
 
+pic_width <- 10.3
+
 pdf(file = "plots/clustering_and_DE/overall_heatmap.pdf",
-    width = 10, height = 7, pointsize = 7.5)
+    width = pic_width, height = 7, pointsize = 7.5)
 draw(total)
 dev.off()
 
 svg(filename = "plots/clustering_and_DE/overall_heatmap.svg",
-    width = 10, height = 7, pointsize = 7.5)
+    width = pic_width, height = 7, pointsize = 7.5)
 draw(total)
 dev.off()
 
 tiff(filename = "plots/clustering_and_DE/overall_heatmap.tiff",
-     width = 10, height = 7, units = "in", res = 600)
+     width = pic_width, height = 7, units = "in", res = 600)
 draw(total)
 dev.off()
 

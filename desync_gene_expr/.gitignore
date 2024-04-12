@@ -19,3 +19,6 @@ R/scratch_file_for_tests.R
 
 # Ignore all network analysis outputs as these tend to be very large
 outputs/network_analysis/*
+
+# Ignore very large clustering output
+outputs/pseudotime_analysis/multiple_dtw_clustering.RData

@@ -571,6 +571,19 @@
       "Hash": "4f57884290cc75ab22f4af9e9d4ca862",
       "Requirements": []
     },
+    "ape": {
+      "Package": "ape",
+      "Version": "5.7-1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "10705eec964349f270504754d8fe8ef1",
+      "Requirements": [
+        "Rcpp",
+        "digest",
+        "lattice",
+        "nlme"
+      ]
+    },
     "ash": {
       "Package": "ash",
       "Version": "1.0-15",
@@ -1982,6 +1995,14 @@
         "rlang"
       ]
     },
+    "memuse": {
+      "Package": "memuse",
+      "Version": "4.2-3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5cfd074e79d5443c523360bbe203d904",
+      "Requirements": []
+    },
     "mgcv": {
       "Package": "mgcv",
       "Version": "1.8-42",
@@ -2126,14 +2147,6 @@
         "askpass"
       ]
     },
-    "pbapply": {
-      "Package": "pbapply",
-      "Version": "1.6-0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "77caedbd6227e10924d1ed2eaa3d53ce",
-      "Requirements": []
-    },
     "pbkrtest": {
       "Package": "pbkrtest",
       "Version": "0.5.1",
@@ -2161,6 +2174,14 @@
         "mvtnorm"
       ]
     },
+    "permute": {
+      "Package": "permute",
+      "Version": "0.9-7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "abf0ca85c1c752e0d04f46334e635046",
+      "Requirements": []
+    },
     "pillar": {
       "Package": "pillar",
       "Version": "1.9.0",
@@ -2176,6 +2197,14 @@
         "utf8",
         "vctrs"
       ]
+    },
+    "pinfsc50": {
+      "Package": "pinfsc50",
+      "Version": "1.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "8368d95a7bb029e43cf5ef8971c17dd9",
+      "Requirements": []
     },
     "pkgconfig": {
       "Package": "pkgconfig",
@@ -2967,6 +2996,25 @@
       "Hash": "f1cb46c157d080b729159d407be83496",
       "Requirements": []
     },
+    "vcfR": {
+      "Package": "vcfR",
+      "Version": "1.15.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b78b5dd40cd173149e47200b74486a71",
+      "Requirements": [
+        "Rcpp",
+        "ape",
+        "dplyr",
+        "magrittr",
+        "memuse",
+        "pinfsc50",
+        "stringr",
+        "tibble",
+        "vegan",
+        "viridisLite"
+      ]
+    },
     "vctrs": {
       "Package": "vctrs",
       "Version": "0.6.3",
@@ -2978,6 +3026,20 @@
         "glue",
         "lifecycle",
         "rlang"
+      ]
+    },
+    "vegan": {
+      "Package": "vegan",
+      "Version": "2.6-4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "659fe7589b8e0b16baa49043a61a0ce0",
+      "Requirements": [
+        "MASS",
+        "cluster",
+        "lattice",
+        "mgcv",
+        "permute"
       ]
     },
     "vipor": {

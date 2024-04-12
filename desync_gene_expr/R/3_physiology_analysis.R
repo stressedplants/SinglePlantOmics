@@ -9,7 +9,7 @@ pheno_scatter <- ggplot(phenos_to_predict, aes(x = leaf_avg, y = biomass,
                     geom_text_repel(label = rownames(phenos_to_predict),
                                     max.overlaps = 20,
                                     max.time = 5,
-                                    max.iter = 1e7,
+                                    max.iter = 1e3,
                                     seed = 1234) +
                     theme_classic(base_size = 12) +
                     xlab("Average leaf size (mm^2)") +
@@ -50,36 +50,7 @@ ggsave("plots/physiology_analysis/bolting_leaf_scatter_big.svg",
        pheno_scatter_big,
        width = 7*1.2, height = 5*1.3)
 
-# Comparison of DGEs with physiology prediction ==========
+# Test to compare leaf size and biomass based on bolting status ====
 
-biomass_regs_enet_params <- as.data.frame(read_excel(
-  path = "data/physiology_pred/biomass_regs_coefs.xlsx"
-))
-row.names(biomass_regs_enet_params) <- biomass_regs_enet_params[, 1]
-biomass_regs_enet_params <- biomass_regs_enet_params[, -1]
-
-non_zero_biomass_genes <- colnames(biomass_regs_enet_params)[
-  which(abs(biomass_regs_enet_params["median", ]) > 0)
-]
-
-leaf_regs_enet_params <- as.data.frame(read_excel(
-  path = "data/physiology_pred/leaf_regs_coefs.xlsx"
-))
-row.names(leaf_regs_enet_params) <- leaf_regs_enet_params[, 1]
-leaf_regs_enet_params <- leaf_regs_enet_params[, -1]
-
-non_zero_leaf_genes <- colnames(leaf_regs_enet_params)[
-  which(abs(leaf_regs_enet_params["median", ]) > 0)
-]
-
-# How many of these are DEGs?
-
-all_DGEs <- row.names(volcano_data)[volcano_data$diffexpressed != "NO"]
-
-print(paste0(sum(non_zero_biomass_genes %in% all_DGEs), " out of ",
-             length(non_zero_biomass_genes), " possible non-zero median biomass ",
-             "predictors are differentially expressed"))
-
-print(paste0(sum(non_zero_leaf_genes %in% all_DGEs), " out of ",
-             length(non_zero_leaf_genes), " possible non-zero median leaf ",
-             "predictors are differentially expressed"))
+wilcox.test(biomass ~ bolting, data = phenos_to_predict)
+wilcox.test(leaf_avg ~ bolting, data = phenos_to_predict)

@@ -1,9 +1,5 @@
 # Summary of outputs
 
-These folders separate the outputs (i.e. anything produced by the code that is not an image).
-
--   `tpm_tables` contains processed gene expression data. There are different versions with different normalisations.
+-   `tpm_tables` contains processed gene expression data. There are different versions with different normalisations. These are used as inputs to `desync_python_scripts`.
 -   `clustering_and_DE` contains info on differentially expressed genes and related clustering (without pseudotime)
--   `pseudotime` contains outputs related to pseudotime inference.
--   `pseudotime_analysis` contains downstream analysis of pseudotime results
--   `network_analysis` contains outputs related to GRN inference
+-   `pseudotime` contains outputs related to pseudotime inference, smooting, and downstream analysis.

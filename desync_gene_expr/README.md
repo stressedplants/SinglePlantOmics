@@ -1,6 +1,6 @@
-# R scripts for *Single-plant-omics reveals the cascade of transcriptional changes during the vegetative-to-reproductive transition*
+# R scripts for Single-plant-omics
 
-This repository contains the code to run the analysis and create figures for this project. READMEs explain the data and how to run the code.
+This repository contains the code to run the analysis and create figures for this project. READMEs in the `data` and `R` subfolders explain the data and the purpose of the code, respectively.
 
 ## Installation
 

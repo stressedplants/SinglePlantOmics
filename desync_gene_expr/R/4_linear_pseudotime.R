@@ -26,7 +26,7 @@ return_order_from_genes <- function(gene_ids,
 
 # first predict lots of orderings based on a partition of the genes
 
-partition_bootstrap <- function(num_bins,
+partition_crossvalidation <- function(num_bins,
                                 TPM_table = TPM_DE_filtered,
                                 seed = 123) {
   
@@ -57,7 +57,7 @@ partition_bootstrap <- function(num_bins,
   return(ptimes_df)
 }
 
-bootstrap_output <- partition_bootstrap(100)
+cv_output <- partition_crossvalidation(100)
 
 # order by the mode than add a heatmap
 mode_val <- function(x) {
@@ -66,23 +66,23 @@ mode_val <- function(x) {
 
 set.seed(123)  # ensure that decisions about pseudotime as reproducible
 
-mode_values <- apply(bootstrap_output, 2, mode_val)
-bootstrap_output <- bootstrap_output[, order(mode_values)]
-rownames(bootstrap_output) <- as.character(rownames(bootstrap_output))
+mode_values <- apply(cv_output, 2, mode_val)
+cv_output <- cv_output[, order(mode_values)]
+rownames(cv_output) <- as.character(rownames(cv_output))
 
-pseudotime_output <- 1:ncol(bootstrap_output)
-names(pseudotime_output) <- colnames(bootstrap_output)
+pseudotime_output <- 1:ncol(cv_output)
+names(pseudotime_output) <- colnames(cv_output)
 
-reordered_bolting <- anno_col[colnames(bootstrap_output), ]
+reordered_bolting <- anno_col[colnames(cv_output), ]
 reordered_anno_col <- data.frame("bolting" = reordered_bolting)
-rownames(reordered_anno_col) <- colnames(bootstrap_output)
+rownames(reordered_anno_col) <- colnames(cv_output)
 
 renamed_anno_colours <- anno_colours
 names(renamed_anno_colours) <- c("bolting")
 
-svg(filename = "plots/pseudotime/bootstrap_heatmap.svg",
-    width = 10, height = 11, pointsize = 7.5)
-pheatmap(bootstrap_output,
+svg(filename = "plots/pseudotime/cv_heatmap.svg",
+    width = 10, height = 11.5, pointsize = 7.5)
+pheatmap(cv_output,
          color = inferno(10),
          cluster_cols = FALSE,
          show_rownames = TRUE,
@@ -96,15 +96,15 @@ dev.off()
 # metastable states are clusters of 'uncertainty' along the diagonal
 
 metastable_mat <- data.frame(matrix(
-  NA, nrow = ncol(bootstrap_output), ncol = ncol(bootstrap_output)
+  NA, nrow = ncol(cv_output), ncol = ncol(cv_output)
 ))
 
-rownames(metastable_mat) <- colnames(bootstrap_output)
-colnames(metastable_mat) <- colnames(bootstrap_output)
+rownames(metastable_mat) <- colnames(cv_output)
+colnames(metastable_mat) <- colnames(cv_output)
 
-for (sample_i in colnames(bootstrap_output)) {
-  for (sample_j in colnames(bootstrap_output)) {
-    simple_df <- bootstrap_output[, c(sample_i, sample_j)]
+for (sample_i in colnames(cv_output)) {
+  for (sample_j in colnames(cv_output)) {
+    simple_df <- cv_output[, c(sample_i, sample_j)]
     
     # sample probability of sample i < sample j in pseudotime
     sample_proportion <- (sum(simple_df[,1] < simple_df[,2]) / nrow(simple_df))
@@ -122,7 +122,7 @@ dev.off()
 
 # Create final pseudotime TPMs ======
 
-TPM_pseudotime <- TPM_clipped_and_01[, colnames(bootstrap_output)]
+TPM_pseudotime <- TPM_clipped_and_01[, colnames(cv_output)]
 
 write.csv(TPM_pseudotime, "outputs/tpm_tables/TPM_pseudotime.csv")
 
@@ -135,7 +135,7 @@ first_pc <- 1
 second_pc <- 2
 
 # correct order for conditions
-conds_pseudotime <- conds_filtered[colnames(bootstrap_output), ]  
+conds_pseudotime <- conds_filtered[colnames(cv_output), ]  
 
 pca_plant_for_plot <- data.frame(pca_on_plants$x[, c(first_pc, second_pc)])
 pca_plant_for_plot$bolting <- conds_pseudotime$bolting
@@ -324,11 +324,11 @@ hlist_ptime <- GO_heatmap_over_pseudotime(
 total_ptime <- hlist_ptime[[1]] %v% hlist_ptime[[2]] %v% hlist_ptime[[3]] %v% hlist_ptime[[4]]
 
 svg(filename = "plots/pseudotime/pseudotime_heatmap.svg",
-    width = 10, height = 7, pointsize = 7.5)
+    width = 10.5, height = 7, pointsize = 7.5)
 draw(total_ptime)
 dev.off()
 
 tiff(filename = "plots/pseudotime/pseudotime_heatmap.tiff",
-     width = 10, height = 7, units = "in", res = 600)
+     width = 10.5, height = 7, units = "in", res = 600)
 draw(total_ptime)
 dev.off()

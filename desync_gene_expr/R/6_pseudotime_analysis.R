@@ -171,6 +171,19 @@ all_nonmonotonic_AUC_df <- data.frame(gene_id = nonmonotonic_genes,
 AUC_total_df <- rbind(all_decreasing_AUC_df, all_increasing_AUC_df, all_nonmonotonic_AUC_df)
 row.names(AUC_total_df) <- AUC_total_df$gene_id
 
+# Save output of AUC for supplemental data =====
+
+AUC_output_df <- AUC_total_df
+AUC_output_df <- AUC_output_df[order(AUC_total_df$gene_id), ]
+
+# add a column to say either "increasing", "decreasing" or "nonmonotonic"
+AUC_output_df$monotonicity <- rep("", nrow(AUC_output_df)) 
+AUC_output_df[increasing_monotonic, "monotonicity"] <- "increasing"
+AUC_output_df[decreasing_monotonic, "monotonicity"] <- "decreasing"
+AUC_output_df[nonmonotonic_genes, "monotonicity"] <- "nonmonotonic"
+
+write.xlsx(AUC_output_df, file = "outputs/pseudotime_analysis/AUC_values.xlsx",
+           row.names = FALSE)
 # Plots of AUC by GO term ========
 
 produce_AUC_df_GO <- function(
@@ -575,3 +588,4 @@ ggsave("plots/pseudotime_analysis/combinded_violin.svg",
        width = 10,
        height = 7,
        pointsize = 18)
+
