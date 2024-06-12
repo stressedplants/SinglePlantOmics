@@ -1,6 +1,11 @@
-# Desyncronised Gene Expression in *Arabidopsis thaliana*
+# Single-plant-omics reveals the cascade of transcriptional changes during the vegetative-to-reproductive transition - R code
 
-This repository contains the code to run the analysis and create figures for this project. READMEs in the `data` and `R` subfolders explain the data and the purpose of the code, respectively.
+This repository contains the code to run the analysis and create figures for this project.
+
+For additional details see: 
+
+-	`data/data_summary.md` for the sources and explanation of the data
+-	`R/script_summary.md` for an explanation of the R scripts.
 
 ## Installation
 
