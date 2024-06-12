@@ -1,6 +1,6 @@
 # Summary of scripts
 
-Scripts in this folder are numbered by steps in the analysis. They should be run sequentially.
+Scripts in this folder are numbered by steps in the analysis.
 
 ### List of scripts scripts
 
@@ -15,3 +15,4 @@ Scripts in this folder are numbered by steps in the analysis. They should be run
 -   `8_variant_calling_analysis.R` processes the variants and relates them to pseudotime and physiology
 -   `9_ape_phylogeny.R` uses the `ape` package to produce a bootstrapped neighbour-joining tree based on variants
 -   `10_dtwclustering.R` uses the `DTWClust` package to perform clustering on the gene expression data over pseudotime
+-   `11_SNPrelate_phylogeny.R` uses `SNPRelate` to test for variant subgroups using a different method

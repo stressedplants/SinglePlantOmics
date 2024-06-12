@@ -65,6 +65,9 @@ ggsave("plots/variant_calling/pca_snps_pseudotime.svg", pca_snps_pseudotime)
 
 # bolting ggplot
 
+# a vertical line is sufficient to separate out the two large subgroups
+PC1_boundary <- -2.25
+
 pca_snps_bolting <- ggplot(pca_snps_for_plot, aes(x = PC1, y = PC2, 
                                                   color = bolting)) +
   geom_point() +
@@ -77,9 +80,56 @@ pca_snps_bolting <- ggplot(pca_snps_for_plot, aes(x = PC1, y = PC2,
               sprintf(pca_summary$importance[2, 2]*100, fmt = "%#.1f"),
               "% of variance)")) + 
   scale_color_manual(values = c("N" = no_col,
-                                "Y" = yes_col))
+                                "Y" = yes_col)) +
+  geom_vline(xintercept = PC1_boundary) +
+  geom_label_repel(label = row.names(pca_snps_for_plot), 
+                   size = 3,
+                   seed = 123,
+                   max.overlaps = 100)
 
-ggsave("plots/variant_calling/pca_snps_bolting.svg", pca_snps_bolting)
+ggsave("plots/variant_calling/pca_snps_bolting.svg", pca_snps_bolting,
+       width = 8, height = 7)
+
+# Compute linear models for the two subgroups per gene =====
+
+subgroup_one <- as.factor(pca_snps_for_plot$PC1 < PC1_boundary)
+names(subgroup_one) <- row.names(pca_snps_for_plot)
+
+run_lm_on_gene <- function(gene_id) {
+  snp_lm_data <- data.frame(
+    log_expr = as.numeric(log2(TPM_filtered[gene_id, names(subgroup_one)] + 1)),
+    subgroups = subgroup_one
+  )
+  
+  snp_lm <- lm(log_expr ~ 1 + subgroups, data = snp_lm_data)
+  
+  return(snp_lm)
+}
+
+all_gene_lms <- lapply(1:nrow(TPM_filtered), function(row_i) {
+  if (row_i %% 1000 == 0) message(row_i)
+  
+  return(run_lm_on_gene(row.names(TPM_filtered)[row_i]))
+})
+
+save(all_gene_lms, file = "outputs/variant_calling/lms_subgroups_per_gene.Rdata")
+
+# extract the t and p-values
+subgroups_p_vals_df <- as.data.frame(t(sapply(1:nrow(TPM_filtered), function(row_i) {
+  summary(all_gene_lms[[row_i]])$coefficients[
+    "subgroupsTRUE", 
+  ]
+})))
+row.names(subgroups_p_vals_df) <- row.names(TPM_filtered)
+
+# also provide a corrected p-value using BH procedure
+subgroups_p_vals_df$p_adjusted <- p.adjust(subgroups_p_vals_df$`Pr(>|t|)`, 
+                                           method = "BH")
+
+message(paste0(sum(subgroups_p_vals_df$p_adjusted < 0.05), 
+               " genes had an adjusted p-value (BH) less than 0.05"))
+
+write.xlsx2(subgroups_p_vals_df, "outputs/variant_calling/lms_statistics.xlsx")
 
 # Find correlations between pseudotime / physiology and variants =========
 
@@ -93,7 +143,6 @@ biomass_variant_corrs <- apply(only_geno_numeric, 1, function(row_in) {
   # ensure that pseudotime is reordered to consider the correlation
   cor(row_in, phenos_to_predict[names(row_in), "biomass"])
 })
-
 
 # repeat for leaf size
 leaf_variant_corrs <- apply(only_geno_numeric, 1, function(row_in) {

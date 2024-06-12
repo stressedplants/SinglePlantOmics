@@ -3,12 +3,10 @@
 print('Loading phsyiological data')
 
 wt_data <- read_excel("./data/pheno/wt_2021_cleaned.xlsx")
-mutant_data <- read_excel("./data/pheno/mutant_2021_cleaned.xlsx")
 
 colnames(wt_data) <- c("id", "leaf_num", "bolting", "biomass", "leaf_1", 
                        "leaf_2", "notes", "rna", "date_of_extraction", 
                        "conc", "260_280", "260_230", "tray_num")
-colnames(mutant_data) <- c("id", "genotype", "date", "days", "leaf_num")
 
 
 # Wild type cleaning ===============

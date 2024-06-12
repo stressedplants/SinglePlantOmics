@@ -295,3 +295,12 @@ keep_after_IQR <- setdiff(keep_after_GCV, remove_after_IQR)
 num_after_IQR <- length(keep_after_IQR)
 print(paste0("Leaves ", num_after_IQR, " genes after GCV and IQR filtering"))
 
+# save a data frame with these values =========
+filtering_values <- data.frame(
+  gcv_value = optimal_outputs$gcv[ordered_GCV_genes],
+  iqr_value = ratios_vec[ordered_GCV_genes]
+)
+row.names(filtering_values) <- ordered_GCV_genes
+
+write.csv(filtering_values,
+          "outputs/pseudotime/filtering_values.csv")
